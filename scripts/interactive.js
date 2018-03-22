@@ -14,6 +14,8 @@ const events = require('events');
 const path = require('path');
 const notifier = require('node-notifier');
 const readline = require('readline');
+const emoji = require('node-emoji');
+const emojis_keywords = require('emojis-keywords');
 
 let messenger;
 
@@ -34,10 +36,28 @@ let attsNo = 0;
 // Milliseconds in a day
 const msInADay = 86400000; // 60 * 60 * 24 * 1000
 
+function completer(linePartial) {
+    let cmds = linePartial.split(" ");
+    let prefix = cmds.slice(0,cmds.length-1).join(' ');
+    let hits = emojis_keywords.filter( a => {
+      return a.startsWith(cmds[cmds.length-1]);
+    })
+
+    if ((cmds.length > 1) && (hits.length === 1)) {
+        let lastCmd = cmds.slice(-1)[0];
+        let pos = lastCmd.length;
+        rlInterface.line = linePartial.slice(0, -pos).concat(hits[0]);
+        rlInterface.cursor = rlInterface.line.length + 1;
+    }
+
+    return [hits, linePartial];
+}
+
 const rlInterface = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: '> '
+    prompt: '> ',
+    completer: completer
 });
 
 const colorList = [
@@ -459,8 +479,14 @@ InteractiveCli.prototype.handleCommands = function(command) {
 };
 
 InteractiveCli.prototype.handler = function(value) {
-    const text = value.toString();
+    var text = value.toString();
     value = value.toLowerCase().trim();
+
+    var re = /(:[a-zA-Z]+:)/g;
+    const original_text = text;
+    while (m = re.exec(original_text)) {
+        text = text.replace(m[1], emoji.get(m[1]));
+    }
 
     if (value.indexOf('/') === 0) {
         interactive.handleCommands(text);

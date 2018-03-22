@@ -8,7 +8,9 @@
   "dependencies": {
     "cheerio": "^0.20.0",
     "colors": "^1.1.2",
+    "emojis-keywords": "^2.0.0",
     "events": "^1.1.0",
+    "node-emoji": "^1.8.1",
     "node-notifier": "^5.1.2",
     "open": "0.0.5",
     "phantomjs-prebuilt": "^2.1.7",
